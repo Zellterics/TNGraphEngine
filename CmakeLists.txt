@@ -1,0 +1,16 @@
+cmake_minimum_required(VERSION 3.10)
+project(TNGraphEngine)
+
+set(CMAKE_CXX_STANDARD 23)
+
+set(SOURCES
+    Conection.cpp
+    ConectionsList.cpp
+    Graph.cpp
+    LinkedList.cpp
+    main.cpp
+    Menus.cpp
+    Node.cpp
+)
+
+add_executable(TNGraphEngine ${SOURCES})
