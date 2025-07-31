@@ -6,22 +6,23 @@ class Node
 {
 private:
 	void *data;
-	int ID, content;
+	int ID;
+	std::string content;
 	ConectionsList* conectionList;
 	Node* past, * next, * mySelf;
 public:
-	Node(int content, Node* past);
+	Node(std::string content, Node* past);
 	~Node();
-	bool ConectToNodeID(int content, int NodeID);
-	bool ConectToNodeID(int content, int NodeID, int extraUtilitys);
+	bool ConectToNodeID(std::string content, int NodeID);
+	bool ConectToNodeID(std::string content, int NodeID, int extraUtilitys);
 	bool DeleteConectionToNodeID(int NodeID);
 	bool ExistedNodeID(int NodeID);
-	bool SetContent(int content);
+	bool SetContent(std::string content);
 	bool SetID(int NodeID);
 	bool SetNext(Node* next);
 	bool SetPast(Node* past);
-	int GetConectionValueTowardsNodeID(int NodeID);
-	int GetContent();
+	std::string GetConectionValueTowardsNodeID(int NodeID);
+	std::string GetContent();
 	int GetGrade();
 	int GetID();
 	int GetNodeIDOnListPosition(int position);

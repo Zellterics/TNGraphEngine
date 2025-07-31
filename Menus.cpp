@@ -2,6 +2,7 @@
 
 Menus::Menus(Graph* graph) {
 	int content, NodeID;
+	std::string stringContent;
 	bool stop = false;
 	std::string input;
 	char filteredInput;
@@ -15,7 +16,6 @@ Menus::Menus(Graph* graph) {
 			std::cout << "---ConectWith   ---\n";
 			std::cout << "---GoTo         ---\n";
 			std::cout << "---SlideTo      ---\n";
-			std::cout << "---NodeSearch   ---\n";
 			std::cout << "---WholeSearch  ---\n";
 			std::cout << "---Print        ---\n";
 			std::cout << "---Everything   ---\n";
@@ -23,26 +23,27 @@ Menus::Menus(Graph* graph) {
 			std::cout << "---DeleteActual ---\n";
 			std::cout << "---ModifyContent---\n";
 			std::cout << "---HowManyNodes ---\n";
-			std::cout << "---ZDFS         ---\n";
 			std::cout << "---Terminate    ---\n";
 			break;
 		case 'a': case 'A':
 			std::cout << "--->Node content:";
-			std::cin >> content;
-			content = CinFail(content);
-			graph->AddNode(content);
+			std::cin >> stringContent;
+			stringContent = CinFail(stringContent);
+			graph->AddNode(stringContent);
 			PrintActual(graph);
 			break;
 		case 'c': case 'C':
 			std::cout << "--->Conection content:";
-			std::cin >> content;
-			content = CinFail(content);
+			std::cin >> stringContent;
+			stringContent = CinFail(stringContent);
 			std::cout << "\n--->Conection NodeID:";
 			std::cin >> NodeID;
 			NodeID = CinFail(NodeID);
-			graph->ConectToNodeID(content, NodeID);
+			if(!graph->ConectToNodeID(stringContent, NodeID)){
+				std::cout << "already connected" << std::endl;
+			}
 			PrintActual(graph);
-			std::cout << "--(" << content << ")-->";
+			std::cout << "--(" << stringContent << ")-->";
 			PrintWithNodeID(graph, NodeID);
 			break;
 		case 'g': case 'G':
@@ -69,23 +70,6 @@ Menus::Menus(Graph* graph) {
 		case 'e': case 'E':
 			PrintEverything(graph);
 			break;
-		case 'n': case 'N': {
-			std::cout << "--->NodeID:";
-			std::cin >> NodeID;
-			NodeID = CinFail(NodeID);
-			if (graph->GetNodeWithID(NodeID) == nullptr) {
-				std::cout << "--->ERROR: Not Such NodeID Conection\n";
-				PrintActual(graph);
-				continue;
-			}
-			ConectionsList temp = graph->PathFindingToNodeID(NodeID);
-			Conection* move = temp.GetStart();
-			while (move != nullptr) {
-				std::cout << "\n";
-				std::cout << "--(" << move->GetValue() << ", ID:" << move->GetID() << ")-->NodeID[" << move->GetNodeID() << "]";
-				move = move->GetNext();
-			}
-			break; }
 		case 'w': case 'W':
 			PathFindingToAll(graph);
 			break;
@@ -111,25 +95,14 @@ Menus::Menus(Graph* graph) {
 			break;
 		case 'm': case 'M':
 			std::cout << "--->Node content:";
-			std::cin >> content;
-			content = CinFail(content);
-			graph->ChangeActualNodeContent(content);
+			std::cin >> stringContent;
+			stringContent = CinFail(stringContent);
+			graph->ChangeActualNodeContent(stringContent);
 			PrintActual(graph);
 			break;
 		case 'h': case 'H':
 			std::cout << "There are " << graph->CountNodes() << " Nodes\n";
 			break;
-		case 'z': case 'Z':
-			std::cout << "--->Node content:";
-			std::cin >> content;
-			content = CinFail(content); 
-			{
-				std::vector<int> save = graph->DepthFirstSearch(content);
-				for (int i : save) {
-					std::cout << i << ", ";
-				}
-				break; 
-			}
 		default:
 			std::cout << "That's Not An Option" << std::endl;
 			break;
@@ -147,7 +120,7 @@ void Menus::PathFindingToAll(Graph* graph) {
 		std::cout << "ERROR: There's No Actual Node" << std::endl;
 		return;
 	}
-	ConectionsList NodeSteps(0, graph->GetActualNode()->GetID(), 6);
+	ConectionsList NodeSteps("return", graph->GetActualNode()->GetID(), 6);
 	Node* move = graph->GetActualNode();
 	for (int i = 1;; i++) {
 		for (int j = 0; move->GetNodeIDOnListPosition(j) != -1; j++) {

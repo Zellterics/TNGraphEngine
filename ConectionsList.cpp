@@ -1,13 +1,13 @@
 #include "ConectionsList.h"
 
 
-ConectionsList::ConectionsList(int content, int NodeID) {
+ConectionsList::ConectionsList(std::string content, int NodeID) {
 	start = new Conection(content, nullptr, NodeID);
 	end = start;
 	move = start;
 }
 
-ConectionsList::ConectionsList(int content, int NodeID, int extraUtilitys) {
+ConectionsList::ConectionsList(std::string content, int NodeID, int extraUtilitys) {
 	start = new Conection(content, nullptr, NodeID);
 	end = start;
 	move = start;
@@ -22,7 +22,7 @@ ConectionsList::~ConectionsList() {
 	}
 }
 
-bool ConectionsList::AddConection(int content, int NodeID) {
+bool ConectionsList::AddConection(std::string content, int NodeID) {
 	if (ExistedID(NodeID)) {
 		//std::cout << "ERROR: Conection To " << NodeID << " Already Exists" << std::endl;
 	}
@@ -31,7 +31,7 @@ bool ConectionsList::AddConection(int content, int NodeID) {
 	return true;
 }
 
-bool ConectionsList::AddConection(int content, int NodeID, int extraUtilitys) {
+bool ConectionsList::AddConection(std::string content, int NodeID, int extraUtilitys) {
 	if (ExistedID(NodeID)) {
 		//std::cout << "ERROR: Conection To " << NodeID << " Already Exists" << std::endl;
 	}
@@ -66,7 +66,7 @@ int ConectionsList::GetConectionOnListPosition(int position) {
 	return move->GetNodeID();
 }
 
-int ConectionsList::GetConectionValueOnNodeID(int NodeID) {
+std::string ConectionsList::GetConectionValueOnNodeID(int NodeID) {
 	move = start;
 	while (move != nullptr) {
 		if (move->GetNodeID() == NodeID) {
@@ -74,7 +74,7 @@ int ConectionsList::GetConectionValueOnNodeID(int NodeID) {
 		}
 		move = move->GetNext();
 	}
-	return -1;
+	return "OOpsie: ewwow code: 001";
 }
 
 int ConectionsList::GetConectionExtraUtilitysOnNodeID(int NodeID) {
@@ -99,7 +99,7 @@ int ConectionsList::GetNodeIDWithExtraUtilitys(int extraUtilitys) {
 	return -1;
 }
 
-void ConectionsList::ReplaceValuesOnNodeID(int content, int NodeID, int extraUtilitys) {
+void ConectionsList::ReplaceValuesOnNodeID(std::string content, int NodeID, int extraUtilitys) {
 	move = start;
 	while(move != nullptr) {
 		if (move->GetNodeID() == NodeID) {

@@ -7,7 +7,6 @@ set(SOURCES
     Conection.cpp
     ConectionsList.cpp
     Graph.cpp
-    LinkedList.cpp
     main.cpp
     Menus.cpp
     Node.cpp

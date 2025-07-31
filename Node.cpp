@@ -1,6 +1,6 @@
 #include "Node.h"
 
-Node::Node(int content, Node* past) {
+Node::Node(std::string content, Node* past) {
 	this->content = content;
 	this->past = past;
 
@@ -16,7 +16,7 @@ Node::Node(int content, Node* past) {
 		past->SetNext(mySelf);
 	}
 	data = nullptr;
-	conectionList = new ConectionsList(0, ID);
+	conectionList = new ConectionsList("return", ID);
 }
 
 Node::~Node() {
@@ -31,7 +31,7 @@ void Node::SetData(void *data) {
 	this->data = data;
 }
 
-bool Node::ConectToNodeID(int content, int NodeID) {
+bool Node::ConectToNodeID(std::string content, int NodeID) {
 	if (ExistedNodeID(NodeID)) {
 		//std::cout << "ERROR: CONECTION ALREADY EXISTS" << std::endl;
 		return false;
@@ -44,13 +44,14 @@ bool Node::ExistedNodeID(int NodeID) {
 	return conectionList->ExistedID(NodeID);
 }
 
-int Node::GetContent() {
+std::string Node::GetContent() {
 	return content;
 }
 
-int Node::GetConectionValueTowardsNodeID(int NodeID) {
-	if (conectionList->GetConectionValueOnNodeID(NodeID) == -1) {
+std::string Node::GetConectionValueTowardsNodeID(int NodeID) {
+	if (conectionList->GetConectionValueOnNodeID(NodeID) == "OOpsie: ewwow code: 001") {
 		//std::cout << "ERROR: NodeID Not Found" << std::endl;
+		return "OOpsie: ewwow code: 001 -> 003";
 	}
 	return conectionList->GetConectionValueOnNodeID(NodeID);
 }
@@ -83,7 +84,7 @@ ConectionsList* Node::GetConectionList() {
 	return conectionList;
 }
 
-bool Node::SetContent(int content) {
+bool Node::SetContent(std::string content) {
 	this->content = content;
 	return true;
 }
@@ -107,7 +108,7 @@ bool Node::DeleteConectionToNodeID(int NodeID) {
 	return conectionList->DeleteConectionToNodeID(NodeID);
 }
 
-bool Node::ConectToNodeID(int content, int NodeID, int extraUtilitys) {
+bool Node::ConectToNodeID(std::string content, int NodeID, int extraUtilitys) {
 	if (ExistedNodeID(NodeID)) {
 		//std::cout << "ERROR: CONECTION ALREADY EXISTS" << std::endl;
 		return false;

@@ -1,6 +1,6 @@
 #include "Graph.h"
 
-Graph::Graph(int content) {
+Graph::Graph(std::string content) {
 	start = new Node(content, nullptr);
 	move = start;
 	end = start;
@@ -27,7 +27,7 @@ void Graph::SetActualData(void* data) {
 	return actual->SetData(data);
 }
 
-bool Graph::AddNode(int content) {
+bool Graph::AddNode(std::string content) {
 	if (start == nullptr) {
 		start = new Node(content, nullptr);
 		move = start;
@@ -44,13 +44,13 @@ bool Graph::AddNode(int content) {
 ConectionsList* Graph::GetActualConections() {
 	if (actual == nullptr) {
 		//std::cout << "ERROR: There's No Actual Node" << std::endl;
-		ConectionsList* fail = new ConectionsList(-1, -1);
+		ConectionsList* fail = new ConectionsList("OOpsie: ewwow code: 002", -1);
 		return fail;
 	}
 	return actual->GetConectionList();
 }
 
-bool Graph::ConectToNodeID(int content, int NodeID) {
+bool Graph::ConectToNodeID(std::string content, int NodeID) {
 	if (start == nullptr) {
 		//std::cout << "ERROR: The Graph Is Empty" << std::endl;
 		return false;
@@ -63,7 +63,7 @@ bool Graph::ConectToNodeID(int content, int NodeID) {
 	return true;
 }
 
-bool Graph::ChangeActualNodeContent(int content) {
+bool Graph::ChangeActualNodeContent(std::string content) {
 	if (start == nullptr) {
 		//std::cout << "ERROR: The Graph Is Empty" << std::endl;
 		return false;
@@ -126,38 +126,6 @@ int Graph::CountNodes() {
 	return i;
 }
 
-ConectionsList Graph::PathFindingToNodeID(int NodeID) {
-	if (actual == nullptr) {
-		//std::cout << "ERROR: There's No Actual Node" << std::endl;
-		ConectionsList fail(-1, -1);
-		return fail;
-	}
-	ConectionsList NodeSteps(0, actual->GetID(), 6);
-	move = actual;
-	for (int i = 1;; i++) {
-		for (int j = 0; move->GetNodeIDOnListPosition(j) != -1; j++) {
-			if (NodeSteps.GetConectionValueOnNodeID(move->GetNodeIDOnListPosition(j)) > (move->GetConectionValueTowardsNodeID(move->GetNodeIDOnListPosition(j)) + NodeSteps.GetConectionValueOnNodeID(move->GetID()))) {
-				NodeSteps.ReplaceValuesOnNodeID(move->GetConectionValueTowardsNodeID(move->GetNodeIDOnListPosition(j)) + NodeSteps.GetConectionValueOnNodeID(move->GetID()), move->GetNodeIDOnListPosition(j), move->GetID());
-				i = 1;
-			}
-			if (!NodeSteps.ExistedID(move->GetNodeIDOnListPosition(j))) {
-				NodeSteps.AddConection(move->GetConectionValueTowardsNodeID(move->GetNodeIDOnListPosition(j)) + NodeSteps.GetConectionValueOnNodeID(move->GetID()), move->GetNodeIDOnListPosition(j), move->GetID());
-			}
-		}
-		if (NodeSteps.GetConectionOnListPosition(i) == -1) {
-			break;
-		}
-		move = GetNodeWithID(NodeSteps.GetConectionOnListPosition(i));
-	}
-	move = GetNodeWithID(NodeID);
-	ConectionsList result(NodeSteps.GetConectionValueOnNodeID(NodeID), NodeID);
-	while (move != actual) {
-		move = GetNodeWithID(NodeSteps.GetConectionExtraUtilitysOnNodeID(move->GetID()));
-		result.AddConection(NodeSteps.GetConectionValueOnNodeID(move->GetID()), move->GetID());
-	}
-	return result;
-}
-
 Node* Graph::GetActualNode() {
 	return actual;
 }
@@ -193,7 +161,7 @@ Node* Graph::GetStartNode() {
 	return start;
 }
 
-bool Graph::DualConectToNodeID(int content, int NodeID) {
+bool Graph::DualConectToNodeID(std::string content, int NodeID) {
 	if (start == nullptr) {
 		//std::cout << "ERROR: The Graph Is Empty" << std::endl;
 		return false;
@@ -284,34 +252,6 @@ bool Graph::DeleteConectionToNodeID(int NodeID, bool DeleteDual) {
 	actual->DeleteConectionToNodeID(NodeID);
 	move->DeleteConectionToNodeID(actual->GetID());
 	return false;
-}
-
-std::vector<int> Graph::DepthFirstSearch(int Data) {
-	std::vector<int> stack;
-	std::vector<int> stackVisited;
-	std::vector<int> stackVisitedID;
-	ConectionsList* list = actual->GetConectionList();
-	stack.push_back(actual->GetID());
-	stackVisitedID.push_back(actual->GetID());
-	stackVisited.push_back(actual->GetContent());
-	while (!stack.empty()) {
-		move = GetNodeWithID(stack.back());
-		stack.pop_back();
-		if (move->GetContent() == Data) {
-			return stackVisited;
-		}
-		list = move->GetConectionList();
-		for (int i = 1; list->GetConectionOnListPosition(i) != -1; i++) {
-			if (std::count(stackVisitedID.begin(), stackVisitedID.end(), list->GetConectionOnListPosition(i))) {
-				continue;
-			}
-			stack.push_back(list->GetConectionOnListPosition(i));
-			stackVisitedID.push_back(list->GetConectionOnListPosition(i));
-			stackVisited.push_back(list->GetConectionOnListPosition(i));
-		}
-	}
-	stackVisited.push_back(-255);
-	return stackVisited;
 }
 
 /*

@@ -1,6 +1,6 @@
 #include "Conection.h"
 
-Conection::Conection(int content, Conection* past, int NodeID) { 
+Conection::Conection(std::string content, Conection* past, int NodeID) { 
 	this->NodeID = NodeID;
 	this->content = content;
 	this->past = past;
@@ -19,7 +19,7 @@ Conection::Conection(int content, Conection* past, int NodeID) {
 	}
 }
 
-Conection::Conection(int content, Conection* past, int NodeID, int extraUtilitys) {
+Conection::Conection(std::string content, Conection* past, int NodeID, int extraUtilitys) {
 	this->NodeID = NodeID;
 	this->content = content;
 	this->past = past;
@@ -68,7 +68,7 @@ int Conection::GetNodeID() {
 	return NodeID;
 }
 
-int Conection::GetValue() {
+std::string Conection::GetValue() {
 	return content;
 }
 
@@ -76,7 +76,7 @@ int Conection::GetExtraUtilitys() {
 	return extraUtilitys;
 }
 
-void Conection::ReplaceValues(int content, int extraUtilitys) {
+void Conection::ReplaceValues(std::string content, int extraUtilitys) {
 	this->content = content;
 	this->extraUtilitys = extraUtilitys;
 }
