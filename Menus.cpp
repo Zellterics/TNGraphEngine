@@ -1,11 +1,14 @@
 #include "Menus.h"
+#include <fstream>
 
 Menus::Menus(Graph* graph) {
+	std::ifstream file;
 	int content, NodeID;
 	std::string stringContent;
 	bool stop = false;
 	std::string input;
 	char filteredInput;
+	bool userInput = true;
 	input = 'f';
 	while (!stop) {
 		filteredInput = input[0];
@@ -23,46 +26,88 @@ Menus::Menus(Graph* graph) {
 			std::cout << "---DeleteActual ---\n";
 			std::cout << "---ModifyContent---\n";
 			std::cout << "---HowManyNodes ---\n";
+			std::cout << "---LoadFromFile ---\n";
 			std::cout << "---Terminate    ---\n";
 			break;
 		case 'a': case 'A':
-			std::cout << "--->Node content:";
-			std::cin >> stringContent;
+			if(userInput){
+				std::cout << "--->Node content:";
+				std::getline(std::cin, stringContent);
+			} else {
+				if(!std::getline(file, stringContent)){
+					std::cerr << "OOpsie: ewwow code: 005 -> reading file" << std::endl;
+				}
+			}
 			stringContent = CinFail(stringContent);
 			graph->AddNode(stringContent);
-			PrintActual(graph);
+			if (userInput)
+				PrintActual(graph);
 			break;
 		case 'c': case 'C':
-			std::cout << "--->Conection content:";
-			std::cin >> stringContent;
+			if(userInput){
+				std::cout << "--->Conection content:";
+				std::getline(std::cin, stringContent);
+			} else {
+				if(!std::getline(file, stringContent)){
+					std::cerr << "OOpsie: ewwow code: 005 -> reading file" << std::endl;
+				}
+			}
 			stringContent = CinFail(stringContent);
-			std::cout << "\n--->Conection NodeID:";
-			std::cin >> NodeID;
-			NodeID = CinFail(NodeID);
+			if(userInput){
+				std::cout << "--->Conection NodeID:";
+				std::cin >> NodeID;
+				NodeID = CinFail(NodeID);
+			} else {
+				std::string save;
+				if(!std::getline(file, save)){
+					std::cerr << "OOpsie: ewwow code: 005 -> reading file" << std::endl;
+				}
+				NodeID = CinFail(std::stoi(save));
+			}
 			if(!graph->ConectToNodeID(stringContent, NodeID)){
 				std::cout << "already connected" << std::endl;
 			}
-			PrintActual(graph);
-			std::cout << "--(" << stringContent << ")-->";
-			PrintWithNodeID(graph, NodeID);
+			if (userInput){
+				PrintActual(graph);
+				std::cout << "--(" << stringContent << ")-->";
+				PrintWithNodeID(graph, NodeID);
+			}
 			break;
 		case 'g': case 'G':
-			std::cout << "--->NodeID:";
-			std::cin >> NodeID;
-			NodeID = CinFail(NodeID);
+			if(userInput){
+				std::cout << "--->NodeID:";
+				std::cin >> NodeID;
+				NodeID = CinFail(NodeID);
+			} else {
+				std::string save;
+				if(!std::getline(file, save)){
+					std::cerr << "OOpsie: ewwow code: 005 -> reading file" << std::endl;
+				}
+				NodeID = CinFail(std::stoi(save));
+			}
 			if (!graph->GoToNodeID(NodeID)) {
 				std::cout << "--->ERROR: No Such NodeID\n";
 			}
-			PrintActual(graph);
+			if (userInput)
+				PrintActual(graph);
 			break;
 		case 's': case 'S':
-			std::cout << "--->NodeID:";
-			std::cin >> NodeID;
-			NodeID = CinFail(NodeID);
+			if(userInput){
+				std::cout << "--->NodeID:";
+				std::cin >> NodeID;
+				NodeID = CinFail(NodeID);
+			} else {
+				std::string save;
+				if(!std::getline(file, save)){
+					std::cerr << "OOpsie: ewwow code: 005 -> reading file" << std::endl;
+				}
+				NodeID = CinFail(std::stoi(save));
+			}
 			if (!graph->MoveToNodeID(NodeID)) {
 				std::cout << "--->ERROR: Not Such NodeID Conection\n";
 			}
-			PrintActual(graph);
+			if (userInput)
+				PrintActual(graph);
 			break;
 		case 'p': case 'P':
 			PrintActual(graph);
@@ -94,21 +139,52 @@ Menus::Menus(Graph* graph) {
 			graph->DeleteActual();
 			break;
 		case 'm': case 'M':
-			std::cout << "--->Node content:";
-			std::cin >> stringContent;
+			if(userInput){
+				std::cout << "--->Node content:";
+				std::getline(std::cin, stringContent);
+			} else {
+				if(!std::getline(file, stringContent)){
+					std::cerr << "OOpsie: ewwow code: 005 -> reading file" << std::endl;
+				}
+			}
 			stringContent = CinFail(stringContent);
 			graph->ChangeActualNodeContent(stringContent);
-			PrintActual(graph);
+			if (userInput)
+				PrintActual(graph);
 			break;
 		case 'h': case 'H':
 			std::cout << "There are " << graph->CountNodes() << " Nodes\n";
+			break;
+		case 'l' : case 'L':
+			std::cout << "File Path: ";
+			std::getline(std::cin, stringContent);
+			std::cout << stringContent;
+			file = std::ifstream(stringContent);
+			
+			if (!file.is_open()) {
+				std::cout << "OOpsie: ewwow code: 004";
+				break;
+			}
+			userInput = false;
+			break;
+		case 'z':
+			if(!userInput){
+				userInput = true;
+			}
 			break;
 		default:
 			std::cout << "That's Not An Option" << std::endl;
 			break;
 		}
-		std::cout << "\n--->";
-		std::cin >> input;
+		if(userInput){
+			std::cout << "\n--->";
+			std::getline(std::cin, input);
+			input = CinFail(input);
+		} else {
+			if(!std::getline(file, input)){
+				std::cerr << "OOpsie: ewwow code: 005 -> reading file" << std::endl;
+			}
+		}
 	}
 }
 
@@ -171,23 +247,6 @@ void Menus::PrintEverything(Graph* graph) {
 	if (move == nullptr) {
 		return;
 	}
-	if (graph->GetActualData() != nullptr) {
-		while (move != nullptr) {
-			std::cout << "Name:     " << ((Data*)move->GetData())->name << std::endl;
-			std::cout << "LastName: " << ((Data*)move->GetData())->lastName << std::endl;
-			std::cout << "Age:      " << ((Data*)move->GetData())->age << std::endl;
-			std::cout << "Reg:      " << ((Data*)move->GetData())->reg << std::endl;
-			Conection* ConectionMove = move->GetConectionList()->GetStart();
-			while (ConectionMove != nullptr) {
-				std::cout << "\n";
-				std::cout << "--(" << ConectionMove->GetValue() << ", ID:" << ConectionMove->GetID() << ")-->NodeID[" << ConectionMove->GetNodeID() << "]";
-				ConectionMove = ConectionMove->GetNext();
-			}
-			std::cout << "\n*--------------------*\n";
-			move = move->GetNext();
-		}
-		return;
-	}
 	while (move != nullptr) {
 		std::cout << "Node[content:" << move->GetContent() << " | ID:" << move->GetID() << "]";
 		std::cout << "\n";
@@ -231,5 +290,3 @@ void Menus::PrintWithNodeID(Graph* graph, int NodeID) {
 	}
 	std::cout << "Node[content:" << move->GetContent() << " | ID:" << move->GetID() << "]";
 }
-
-//a pepe cacas 21 21100290 a paquito maya 21 21300 a juan alcachofas 10 21300290 a martin julian 17 21300490 a alejandro pinzon 17 211002
