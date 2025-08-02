@@ -33,8 +33,8 @@ void Node::SetData(void *data) {
 
 bool Node::ConectToNodeID(std::string content, int NodeID) {
 	if (ExistedNodeID(NodeID)) {
-		//std::cout << "ERROR: CONECTION ALREADY EXISTS" << std::endl;
-		return false;
+		conectionList->ReplaceValuesOnNodeID(content, NodeID, 0);
+		return true;
 	}
 	conectionList->AddConection(content, NodeID);
 	return true;

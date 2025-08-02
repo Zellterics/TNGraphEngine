@@ -1,0 +1,29 @@
+add
+inicio
+add
+continuacion
+add
+lado 1
+add
+lado 1.1
+add
+lado 2
+goto
+0
+connect
+
+1
+goto
+1
+connect
+opcion1
+2
+connect
+opcion2
+4
+goto
+2
+connect
+
+3
+z

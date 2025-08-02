@@ -26,6 +26,7 @@ public:
 	Node* GetActualNode();
 	Node* GetEndNode();
 	Node* GetNextNode();
+	Node* GetNodeByContent(std::string content);
 	Node* GetNodeWithID(int NodeID);
 	Node* GetPastNode();
 	Node* GetStartNode();

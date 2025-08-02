@@ -13,10 +13,10 @@ private:
 public:
 	Menus(Graph* graph);
 	
-	void PathFindingToAll(Graph* graph);
 	void PrintActual(Graph* graph);
 	void PrintEverything(Graph* graph);
 	void PrintWithNodeID(Graph* graph, int NodeID);
+	std::string UserInput(bool userInput, std::ifstream &file);
 
 
 	template <typename T>

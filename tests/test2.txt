@@ -1,0 +1,6 @@
+UseAltMenu
+A[inicio] --> A1[continuacion]
+A1 -[opcion1]-> B[lado 1]
+B --> B1[lado 1.1]
+A1 -[opcion2]-> C[lado2]
+start

@@ -138,6 +138,21 @@ Node* Graph::GetNextNode() {
 	return actual->GetNext();
 }
 
+Node* Graph::GetNodeByContent(std::string content){
+	if (start == nullptr){
+		//std::cout << "ERROR: The Graph Is Empty" << std::endl;
+		return nullptr;
+	}
+	move = start;
+	while (move != nullptr) {
+		if (move->GetContent() == content) {
+			return move;
+		}
+		move = move->GetNext();
+	}
+	return nullptr;
+}
+
 Node* Graph::GetNodeWithID(int NodeID) {
 	if (start == nullptr) {
 		//std::cout << "ERROR: The Graph Is Empty" << std::endl;
