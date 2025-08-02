@@ -17,6 +17,8 @@ public:
 	void PrintEverything(Graph* graph);
 	void PrintWithNodeID(Graph* graph, int NodeID);
 	std::string UserInput(bool userInput, std::ifstream &file);
+	bool AlternativeMenu(Graph* graph, std::string stringContent);
+	std::ofstream getSaveFileStream(const std::string& fileInput);
 
 
 	template <typename T>
