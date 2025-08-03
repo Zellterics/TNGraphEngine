@@ -1,23 +1,21 @@
 #pragma once
 #include "Graph.h"
+#include <functional>
 
 class Menus
 {
 private:
-	struct Data {
-		std::string name = "";
-		std::string lastName = "";
-		int age = 0;
-		int reg = 0;
-	};
+	std::unordered_map<char, std::function<void()>> commands;
+	Graph* graph;
 public:
 	Menus(Graph* graph);
-	
-	void PrintActual(Graph* graph);
-	void PrintEverything(Graph* graph);
-	void PrintWithNodeID(Graph* graph, int NodeID);
-	std::string UserInput(bool userInput, std::ifstream &file);
-	bool AlternativeMenu(Graph* graph, std::string stringContent);
+	void PrintActual();
+	void PrintEverything();
+	void PrintWithNodeID(int NodeID);
+	std::string GetInput(bool userInput, std::ifstream &file);
+	std::string GetInput();
+	bool AlternativeMenu(std::string stringContent);
+	void StartGameLoop(std::string& savedInputs, const std::string& fileInput);
 	std::ofstream getSaveFileStream(const std::string& fileInput);
 
 
@@ -41,3 +39,9 @@ public:
 		return content;
 	}
 };
+
+namespace Out{
+	inline std::string CLEAR_SCREEN = "\033[2J";
+    inline std::string CURSOR_TOP_LEFT = "\033[H";
+	inline std::string MoveCursorDown(const int& amount) {return ("\033[" + std::to_string(amount) + "B");}
+}

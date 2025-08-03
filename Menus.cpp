@@ -1,9 +1,11 @@
 #include "Menus.h"
+#include "FileIO.h"
 #include <fstream>
 #include <unordered_map>
 #include <filesystem>
 
 Menus::Menus(Graph* graph) {
+	this->graph = graph;
 	std::ifstream file;
 	int content, NodeID;
 	std::string stringContent;
@@ -13,326 +15,235 @@ Menus::Menus(Graph* graph) {
 	char filteredInput;
 	bool userInput = true;
 	input = 'f';
+	std::unordered_map<char, std::function<void()>> commands;
+	commands['a'] = [&](){
+		stringContent = GetInput(userInput, file);
+		graph->AddNode(stringContent);
+		if (userInput)
+			PrintActual();
+	};
+	commands['i'] = [&](){
+		stringContent = GetInput(userInput, file);
+		if(graph->GetNodeByContent(stringContent)){
+			return;
+		}
+		graph->GoToNodeID(graph->GetNodeByContent(stringContent)->GetID());
+	};
+	commands['c'] = [&](){
+		stringContent = GetInput(userInput, file);
+		input = GetInput(userInput, file);
+		std::from_chars(input.data(), input.data() + input.size(), NodeID);
+		if(!graph->ConectToNodeID(stringContent, NodeID)){
+			std::cout << "already connected" << std::endl;
+		}
+		if (userInput){
+			PrintActual();
+			std::cout << "--(" << stringContent << ")-->";
+			PrintWithNodeID(NodeID);
+		}
+	};
+	commands['g'] = [&](){
+		input = GetInput(userInput, file);
+		std::from_chars(input.data(), input.data() + input.size(), NodeID);
+		if (!graph->GoToNodeID(NodeID)) {
+			std::cout << "--->ERROR: No Such NodeID\n";
+		}
+		if (userInput)
+			PrintActual();
+	};
+	commands['s'] = [&](){
+		input = GetInput(userInput, file);
+		std::from_chars(input.data(), input.data() + input.size(), NodeID);
+		if (!graph->MoveToNodeID(NodeID)) {
+			std::cout << "--->ERROR: Not Such NodeID Conection\n";
+		}
+		if (userInput)
+			PrintActual();
+	};
+	commands['p'] = [&](){
+		PrintActual();
+	};
+	commands['e'] = [&](){
+		PrintEverything();
+	};
+	commands['t'] = [&](){
+		stop = true;
+	};
+	commands['b'] = [&](){
+		{
+		ConectionsList* erase = graph->GetActualConections();
+		if (erase->GetConectionOnListPosition(0) == -1) {
+			delete erase;
+		}
+		else {
+			Conection* move = erase->GetStart();
+			while (move != nullptr) {
+				std::cout << "\n";
+				std::cout << "--(" << move->GetValue() << ", ID:" << move->GetID() << ")-->NodeID[" << move->GetNodeID() << "]";
+				move = move->GetNext();
+			}
+		}}
+	};
+	commands['f'] = [&](){
+		std::cout << "---FUNCTIONS    ---\n";
+		std::cout << "---AddNode      ---\n";
+		std::cout << "---ConectWith   ---\n";
+		std::cout << "---GoTo         ---\n";
+		std::cout << "---SlideTo      ---\n";
+		std::cout << "---Print        ---\n";
+		std::cout << "---Everything   ---\n";
+		std::cout << "---BorderNodes  ---\n";
+		std::cout << "---DeleteActual ---\n";
+		std::cout << "---ModifyContent---\n";
+		std::cout << "---HowManyNodes ---\n";
+		std::cout << "---IdentifyNode ---\n";
+		std::cout << "---LoadFromFile ---\n";
+		std::cout << "---Next         ---\n";
+		std::cout << "---UseAltMenu   ---\n";
+		std::cout << "---Terminate    ---\n";
+	};
+	commands['d'] = [&](){
+		graph->DeleteActual();
+	};
+	commands['m'] = [&](){
+		stringContent = GetInput(userInput, file);
+		graph->ChangeActualNodeContent(stringContent);
+		if (userInput)
+			PrintActual();
+	};
+	commands['h'] = [&](){
+		std::cout << "There are " << graph->CountNodes() << " Nodes\n";
+	};
+	commands['l'] = [&](){
+		std::cout << "File Path: ";
+		std::getline(std::cin, fileInput);
+		std::cout << fileInput;
+		file = FileIO::GetFileInputStream(fileInput);
+		
+		if (!file.is_open()) {
+			std::cout << "OOpsie: ewwow code: 004";
+			return;
+		}
+		userInput = false;
+	};
+	commands['z'] = [&](){
+		if(!userInput){
+			userInput = true;
+		}
+	};
+
 	while (!stop) {
-		filteredInput = input[0];
-		if(filteredInput == 'N' || filteredInput == 'n'){
+		filteredInput = tolower(input[0]);
+		if(filteredInput == 'n'){
 			stop = true;
 			break;
 		}
-		if(filteredInput == 'u' || filteredInput == 'U'){
-			stop = false;
+		if(filteredInput == 'u'){
 			break;
 		}
-		switch (filteredInput) {
-		case 'f': case 'F':
-			std::cout << "---FUNCTIONS    ---\n";
-			std::cout << "---AddNode      ---\n";
-			std::cout << "---ConectWith   ---\n";
-			std::cout << "---GoTo         ---\n";
-			std::cout << "---SlideTo      ---\n";
-			std::cout << "---Print        ---\n";
-			std::cout << "---Everything   ---\n";
-			std::cout << "---BorderNodes  ---\n";
-			std::cout << "---DeleteActual ---\n";
-			std::cout << "---ModifyContent---\n";
-			std::cout << "---HowManyNodes ---\n";
-			std::cout << "---IdentifyNode ---\n";
-			std::cout << "---LoadFromFile ---\n";
-			std::cout << "---Next         ---\n";
-			std::cout << "---UseAltMenu   ---\n";
-			std::cout << "---Terminate    ---\n";
-			break;
-		case 'i': case 'I':
-			if(userInput){
-				std::cout << "--->Node content:";
-				std::getline(std::cin, stringContent);
-			} else {
-				if(!std::getline(file, stringContent)){
-					std::cerr << "OOpsie: ewwow code: 005 -> reading file" << std::endl;
-				}
-			}
-			stringContent = CinFail(stringContent);
-			if(graph->GetNodeByContent(stringContent)){
-				break;
-			}
-			graph->GoToNodeID(graph->GetNodeByContent(stringContent)->GetID());
-			break;
-		case 'a': case 'A':
-			if(userInput){
-				std::cout << "--->Node content:";
-				std::getline(std::cin, stringContent);
-			} else {
-				if(!std::getline(file, stringContent)){
-					std::cerr << "OOpsie: ewwow code: 012 -> reading file" << std::endl;
-				}
-			}
-			stringContent = CinFail(stringContent);
-			graph->AddNode(stringContent);
-			if (userInput)
-				PrintActual(graph);
-			break;			
-		case 'c': case 'C':
-			if(userInput){
-				std::cout << "--->Conection content:";
-				std::getline(std::cin, stringContent);
-			} else {
-				if(!std::getline(file, stringContent)){
-					std::cerr << "OOpsie: ewwow code: 011 -> reading file" << std::endl;
-				}
-			}
-			stringContent = CinFail(stringContent);
-			if(userInput){
-				std::cout << "--->Conection NodeID:";
-				std::cin >> NodeID;
-				NodeID = CinFail(NodeID);
-				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-			} else {
-				std::string save;
-				if(!std::getline(file, save)){
-					std::cerr << "OOpsie: ewwow code: 010 -> reading file" << std::endl;
-				}
-				NodeID = CinFail(std::stoi(save));
-			}
-			if(!graph->ConectToNodeID(stringContent, NodeID)){
-				std::cout << "already connected" << std::endl;
-			}
-			if (userInput){
-				PrintActual(graph);
-				std::cout << "--(" << stringContent << ")-->";
-				PrintWithNodeID(graph, NodeID);
-			}
-			break;
-		case 'g': case 'G':
-			if(userInput){
-				std::cout << "--->NodeID:";
-				std::cin >> NodeID;
-				NodeID = CinFail(NodeID);
-				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-			} else {
-				std::string save;
-				if(!std::getline(file, save)){
-					std::cerr << "OOpsie: ewwow code: 009 -> reading file" << std::endl;
-				}
-				NodeID = CinFail(std::stoi(save));
-			}
-			if (!graph->GoToNodeID(NodeID)) {
-				std::cout << "--->ERROR: No Such NodeID\n";
-			}
-			if (userInput)
-				PrintActual(graph);
-			break;
-		case 's': case 'S':
-			if(userInput){
-				std::cout << "--->NodeID:";
-				std::cin >> NodeID;
-				NodeID = CinFail(NodeID);
-				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-			} else {
-				std::string save;
-				if(!std::getline(file, save)){
-					std::cerr << "OOpsie: ewwow code: 008 -> reading file" << std::endl;
-				}
-				NodeID = CinFail(std::stoi(save));
-			}
-			if (!graph->MoveToNodeID(NodeID)) {
-				std::cout << "--->ERROR: Not Such NodeID Conection\n";
-			}
-			if (userInput)
-				PrintActual(graph);
-			break;
-		case 'p': case 'P':
-			PrintActual(graph);
-			break;
-		case 'e': case 'E':
-			PrintEverything(graph);
-			break;
-		case 't': case 'T':
-			stop = true;
-			break;
-		case 'b': case 'B': {
-			ConectionsList* erase = graph->GetActualConections();
-			if (erase->GetConectionOnListPosition(0) == -1) {
-				delete erase;
-			}
-			else {
-				Conection* move = erase->GetStart();
-				while (move != nullptr) {
-					std::cout << "\n";
-					std::cout << "--(" << move->GetValue() << ", ID:" << move->GetID() << ")-->NodeID[" << move->GetNodeID() << "]";
-					move = move->GetNext();
-				}
-			}}
-			break;
-		case 'd': case 'D':
-			graph->DeleteActual();
-			break;
-		case 'm': case 'M':
-			if(userInput){
-				std::cout << "--->Node content:";
-				std::getline(std::cin, stringContent);
-			} else {
-				if(!std::getline(file, stringContent)){
-					std::cerr << "OOpsie: ewwow code: 007 -> reading file" << std::endl;
-				}
-			}
-			stringContent = CinFail(stringContent);
-			graph->ChangeActualNodeContent(stringContent);
-			if (userInput)
-				PrintActual(graph);
-			break;
-		case 'h': case 'H':
-			std::cout << "There are " << graph->CountNodes() << " Nodes\n";
-			break;
-		case 'l' : case 'L':
-			std::cout << "File Path: ";
-			std::getline(std::cin, fileInput);
-			std::cout << fileInput;
-			file = std::ifstream(fileInput);
-			
-			if (!file.is_open()) {
-				std::cout << "OOpsie: ewwow code: 004";
-				break;
-			}
-			userInput = false;
-			break;
-		case 'z':
-			if(!userInput){
-				userInput = true;
-			}
-			break;
-		default:
+		if(commands.contains(filteredInput)){
+			commands[filteredInput]();
+		} else {
 			std::cout << "That's Not An Option" << std::endl;
-			break;
 		}
 		if(userInput){
 			std::cout << "\n--->";
-			std::getline(std::cin, input);
-			input = CinFail(input);
-		} else {
-			if(!std::getline(file, input)){
-				std::cerr << "OOpsie: ewwow code: 006 -> reading file" << std::endl;
-			}
 		}
+		input = GetInput(userInput, file);
 	}
 	
 	while (!stop){
-		stringContent = UserInput(userInput, file);
-		stop = !AlternativeMenu(graph, stringContent);
-		
-		// A[test1]
-		// A --> B[test2]
-		// A -[label1]-> C[test3]
-		// B -[label2]-> B
-		// D
-		// D --> E
-		// F[test4] --> G
-		// G -[label3]-> H[test con espacios]
-		// start
+		stringContent = GetInput(userInput, file);
+		stop = !AlternativeMenu(stringContent);
 	}
 
-	int option = 0;
-	graph->GoToNodeID(option);
-	int maxOption;
+	graph->GoToNodeID(0);
 	std::string savedInputs = "";
-
-	std::string baseName = fileInput.substr(0, fileInput.find_last_of('.'));
-	std::string folderPath;
-	#ifdef _WIN32
-		const char* appdata = std::getenv("APPDATA");
-		if (appdata) {
-			folderPath = std::string(appdata) + "\\TNGraphEngine\\" + baseName;
-		} else {
-			folderPath = "saves\\" + baseName;
-		}
-	#else
-		folderPath = "saves/" + baseName;
-	#endif
+	std::string folderName = FileIO::GetBaseFileName(fileInput);
+	std::filesystem::path folderPath = FileIO::GetBasePath() / folderName;
 
 	bool startLoadGamesMenu = true;
 	if (!std::filesystem::exists(folderPath)) {
-		std::cout << "No existe la carpeta de saves: " << folderPath << "\n";
-		// opcional: std::filesystem::create_directories(folderPath);
 		startLoadGamesMenu = false;
 	}
-	std::vector<std::string> saveFiles;
+	std::vector<std::filesystem::path> saveFiles;
 	if(startLoadGamesMenu){
-		for (const auto& entry : std::filesystem::directory_iterator(folderPath)) {
-			if (entry.is_regular_file() && entry.path().extension() == ".tng") {
-				saveFiles.push_back(entry.path().filename().string());
-			}
-		}
+		saveFiles = FileIO::GetGameSaveFiles(folderName);
 		if (saveFiles.empty()) {
 			startLoadGamesMenu = false;
 		}
 	}
 	while (startLoadGamesMenu){
-		std::cout << "\033[2J\033[H L) Load Save File\n N) New Game\n -->";
-		stringContent = UserInput(true, file);
-		if(stringContent[0] == 'n' || stringContent[0] == 'N'){
+		std::string header = Out::CLEAR_SCREEN + Out::CURSOR_TOP_LEFT + Out::MoveCursorDown(8);
+		std::cout << header << "L) Load Save File\n N) New Game\n -->";
+		stringContent = GetInput();
+		filteredInput = tolower(stringContent[0]);
+		if(filteredInput == 'n'){
 			break;
 		}
-		if(stringContent[0] == 'l' || stringContent[0] == 'L'){
-			int selection = 0;
-			while (true) {
-				std::cout << "\033[2J\033[H\033[<8>B\t\tLoad Game For [" << baseName << "]\n";
-				for (size_t i = 0; i < saveFiles.size(); ++i) {
-					std::string nameWithoutExt = saveFiles[i].substr(0, saveFiles[i].find_last_of('.'));
-					std::cout << "\t\t\t" << (i + 1) << " [" << nameWithoutExt << "]\n";
-				}
-				std::cout << "\t\t\t\t[ ]\r\t\t\t\t[";
-
-				stringContent = UserInput(true, file);
-				auto [ptr, ec] = std::from_chars(stringContent.data(), stringContent.data() + stringContent.size(), selection);
-
-				if (ec == std::errc() && selection >= 1 && selection <= (int)saveFiles.size()) {
-					break;
-				} else {
-					std::cout << "\nInvalid Option. Input anything to retry\n";
-					UserInput(true, file);
-				}
-			}
-			
-			std::string saveFile = saveFiles[selection - 1];
-			std::string fullPath;
-			#ifdef _WIN32
-				fullPath = folderPath + "\\" + saveFile;
-			#else
-				fullPath = folderPath + "/" + saveFile;
-			#endif
-			if(file.is_open()){
-				file.close();
-			}
-			file = std::ifstream(fullPath);
-			if (!file.is_open()) {
-				std::cout << "OOpsie: ewwow code: 012 -> failed to open file\n";
-				UserInput(true, file);
-				continue;
-			}
-			int number;
-			while (stringContent != "z") {
-				stringContent = UserInput(false, file);
-				if(stringContent == ""){
-					stringContent = "1";
-				}
-				if(stringContent != "z"){
-					savedInputs += stringContent + "\n";
-				}
-				auto [ptr, ec] = std::from_chars(stringContent.data(), stringContent.data() + stringContent.size(), number);
-				if (ec == std::errc()) {
-					graph->MoveToNodeID(graph->GetActualConections()->GetConectionOnListPosition(number));
-				}
-			}
-			break;
+		if(!filteredInput == 'l'){
+			continue;
 		}
+		int selection = 0;
+		while (true) {
+			std::cout << header << "\t\tLoad Game For [" << folderName << "]\n";
+			for (size_t i = 0; i < saveFiles.size(); ++i) {
+				std::cout << "\t\t\t" << (i + 1) << " [" << FileIO::GetBaseFileName(saveFiles[i].string()) << "]\n";
+			}
+			std::cout << "\t\t\t\t[ ]\r\t\t\t\t[";
+
+			stringContent = GetInput();
+			auto [ptr, ec] = std::from_chars(stringContent.data(), stringContent.data() + stringContent.size(), selection);
+
+			if (ec == std::errc() && selection >= 1 && selection <= (int)saveFiles.size()) {
+				break;
+			} else {
+				std::cout << "\nInvalid Option. Input anything to retry\n";
+				GetInput();
+			}
+		}
+		
+		std::filesystem::path saveFilePath = saveFiles[selection - 1];
+		std::filesystem::path fullPath = folderPath / saveFilePath;
+		if(file.is_open()){
+			file.close();
+			file.clear();
+		}
+		file = FileIO::GetFileInputStream(fullPath);
+		int number;
+		while (stringContent != "z") {
+			stringContent = GetInput(false, file);
+			if(stringContent == ""){
+				stringContent = "1";
+			}
+			if(stringContent != "z"){
+				savedInputs += stringContent + "\n";
+			}
+			auto [ptr, ec] = std::from_chars(stringContent.data(), stringContent.data() + stringContent.size(), number);
+			if (ec == std::errc()) {
+				graph->MoveToNodeID(graph->GetActualConections()->GetConectionOnListPosition(number));
+			}
+		}
+		break;
 	}
-	
+	StartGameLoop(savedInputs, fileInput);
+	GetInput();
+}
 
-	option = 0;
-	stop = false;
-	
-	while (!stop){
+//Functions
+
+void Menus::StartGameLoop(std::string& savedInputs, const std::string& fileInput){
+	std::string input;
+	int option = 0;
+	int maxOption;
+	std::string folderName = FileIO::GetBaseFileName(fileInput);
+	std::string header = Out::CLEAR_SCREEN + Out::CURSOR_TOP_LEFT + Out::MoveCursorDown(8);
+	std::string leftMenu = std::string("\t\t\t\t\t\t\t\t\t") + "E) Exit   S) Save";
+	std::string dialog;
+	while (true){
 		graph->MoveToNodeID(graph->GetActualConections()->GetConectionOnListPosition(option));
-		std::cout << "\033[2J\033[H\033[<8>B\t\t" << graph->GetActualNode()->GetContent() << "\t\t\t\t\t\t\t\t\t" << "E) Exit   S) Save" << std::endl;
+		dialog = "\t\t" + graph->GetActualNode()->GetContent();
+		std::cout << header << dialog << leftMenu << std::endl;
 		if(graph->GetActualConections()->GetConectionOnListPosition(1) == -1){
 			std::cout << std::endl << "---------------------------------------------------------------------------------------------------------";
 			break;
@@ -353,25 +264,14 @@ Menus::Menus(Graph* graph) {
 			return;
 		}
 		if(input[0] == 's' || input[0] == 'S'){
-			baseName = fileInput.substr(0, fileInput.find_last_of('.'));
-			#ifdef _WIN32
-				const char* appdata = std::getenv("APPDATA");
-				if (appdata) {
-					folderPath = std::string(appdata) + "\\TNGraphEngine\\" + baseName;
-				} else {
-					folderPath = "saves\\" + baseName;
-				}
-			#else
-				folderPath = "saves/" + baseName;
-			#endif
-			std::filesystem::create_directories(folderPath);
+			FileIO::CreateDirectories(folderName);
 			savedInputs += "z";
-			std::ofstream oFile = getSaveFileStream(fileInput);
+			std::ofstream oFile = FileIO::GetFileOutputStream(fileInput);
 			oFile.write(savedInputs.c_str(), savedInputs.size());
 			savedInputs = savedInputs.substr(0, savedInputs.size() - 2);
 			option = 0;
 			std::cout << "\t\tGAME SAVED\n";
-			UserInput(true, file);
+			GetInput();
 			continue;
 		}
 		savedInputs += input + "\n";
@@ -386,12 +286,9 @@ Menus::Menus(Graph* graph) {
 			option = 0;
 		}
 	}
-	std::cin >> stringContent;
 }
 
-//Functions
-
-bool Menus::AlternativeMenu(Graph* graph, std::string stringContent){
+bool Menus::AlternativeMenu(std::string stringContent){
 	std::string nodeName;
 	std::string nodeName2;
 	static std::unordered_map<std::string, int> nodeNameId;
@@ -471,44 +368,7 @@ bool Menus::AlternativeMenu(Graph* graph, std::string stringContent){
 	return true;
 }
 
-std::ofstream Menus::getSaveFileStream(const std::string& fileInput) {
-    std::string baseName;
-    size_t lastDot = fileInput.find_last_of(".");
-    if (lastDot != std::string::npos) {
-        baseName = fileInput.substr(0, lastDot);
-    } else {
-        baseName = fileInput;
-    }
-
-    std::string saveDir;
-
-    #ifdef _WIN32
-        const char* appdata = std::getenv("APPDATA");
-        if (appdata) {
-            saveDir = std::string(appdata) + "\\TNGraphEngine\\" + baseName;
-        } else {
-            saveDir = "saves\\" + baseName;
-        }
-    #else
-        saveDir = "saves/" + baseName;
-    #endif
-
-    std::filesystem::create_directories(saveDir);
-
-    std::string filename = "savefile.tng";
-    std::string fullPath = saveDir + "/" + filename;
-
-    int counter = 1;
-    while (std::filesystem::exists(fullPath)) {
-        filename = "savefile (" + std::to_string(counter++) + ").tng";
-        fullPath = saveDir + "/" + filename;
-    }
-
-    std::ofstream oFile(fullPath);
-    return oFile;
-}
-
-void Menus::PrintActual(Graph* graph) {
+void Menus::PrintActual() {
 	if (graph->GetActualNode() == nullptr) {
 		std::cout << "ERROR: There's No Actual Node" << std::endl;
 		return;
@@ -516,7 +376,7 @@ void Menus::PrintActual(Graph* graph) {
 	std::cout << "Node[content:" << graph->GetActualNode()->GetContent() << " | ID:" << graph->GetActualNode()->GetID() << "]";
 }
 
-std::string Menus::UserInput(bool userInput, std::ifstream &file){
+std::string Menus::GetInput(bool userInput, std::ifstream &file){
 	static std::string stringContent;
 	if(userInput){
 		std::getline(std::cin, stringContent);
@@ -528,8 +388,14 @@ std::string Menus::UserInput(bool userInput, std::ifstream &file){
 	stringContent = CinFail(stringContent);
 	return stringContent;
 }
+std::string Menus::GetInput(){
+	static std::string stringContent;
+	std::getline(std::cin, stringContent);
+	stringContent = CinFail(stringContent);
+	return stringContent;
+}
 
-void Menus::PrintEverything(Graph* graph) {
+void Menus::PrintEverything() {
 	if (graph->GetStartNode() == nullptr) {
 		std::cout << "ERROR: The Graph Is Empty" << std::endl;
 		return;
@@ -552,16 +418,12 @@ void Menus::PrintEverything(Graph* graph) {
 	}
 }
 
-
-void Menus::PrintWithNodeID(Graph* graph, int NodeID) {
+void Menus::PrintWithNodeID(int NodeID) {
 	if (graph->GetStartNode() == nullptr) {
 		std::cout << "ERROR: The Graph Is Empty" << std::endl;
 		return;
 	}
 	Node* move = graph->GetNodeWithID(NodeID);
-	if (move == nullptr) {
-		return;
-	}
 	if (move == nullptr) {
 		std::cout << "ERROR: Node " << NodeID << " Doesn't Exists" << std::endl;
 		return;

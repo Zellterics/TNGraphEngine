@@ -10,6 +10,7 @@ set(SOURCES
     main.cpp
     Menus.cpp
     Node.cpp
+    FileIO.cpp
 )
 
 add_executable(TNGraphEngine ${SOURCES})
