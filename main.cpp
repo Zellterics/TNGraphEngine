@@ -4,7 +4,11 @@
 #include "Menus.h"
 
 int main(){
-	Graph list;
-	Menus menu(&list);
+	Graph game;
+	Menus menu(&game);
+	menu.LegacyMenu();
+	menu.LoadGamesMenu();
+	menu.StartGameLoop();
+	menu.GetInput();
 	return 0;
 }

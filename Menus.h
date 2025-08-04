@@ -1,22 +1,33 @@
 #pragma once
 #include "Graph.h"
 #include <functional>
+#include <filesystem>
+#include <fstream>
 
 class Menus
 {
 private:
-	std::unordered_map<char, std::function<void()>> commands;
+	std::unordered_map<char, std::function<void()>> commands = {};
 	Graph* graph;
+	std::ifstream historyFile;
+	bool userInput = true;
+	std::string savedInputs = "", fileInput = "default.txt";
+	std::vector<std::filesystem::path> saveFiles = {};
 public:
 	Menus(Graph* graph);
+	void LegacyMenu();
+	void LoadGamesMenu();
+	void StartGameLoop();
+	std::string GetInput();
+private:
 	void PrintActual();
 	void PrintEverything();
 	void PrintWithNodeID(int NodeID);
 	std::string GetInput(bool userInput, std::ifstream &file);
-	std::string GetInput();
-	bool AlternativeMenu(std::string stringContent);
-	void StartGameLoop(std::string& savedInputs, const std::string& fileInput);
+	void PrintIfUserInput(bool userInput, std::string stringContent);
+	bool AlternativeMenu();
 	std::ofstream getSaveFileStream(const std::string& fileInput);
+	std::vector<std::filesystem::path> GetFolderSaveFiles(std::string fileInput);
 
 
 	template <typename T>
