@@ -1,6 +1,7 @@
 #include "Menus.h"
 #include "FileIO.h"
 #include <unordered_map>
+#include "external/tabulate.hpp"
 
 Menus::Menus(Graph* graph) {
 	this->graph = graph;
